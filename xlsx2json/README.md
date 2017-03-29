@@ -123,4 +123,3 @@
 
 ## 补充
 * windows/mac/linux都支持。
-* 项目地址 [xlsx2json master](https://github.com/koalaylj/xlsx2json)
