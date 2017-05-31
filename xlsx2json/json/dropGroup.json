@@ -1,0 +1,66 @@
+{
+  "s100001": {
+    "allDrop": 0,
+    "dropNum": 3,
+    "noRepeat": 0,
+    "description": "m里掉落n个,根据权重随机掉落n次,结果可重复",
+    "dropIds": [
+      {
+        "dropId": "s100003",
+        "percent": 3
+      },
+      {
+        "dropId": "s100004",
+        "percent": 4
+      }
+    ]
+  },
+  "s100002": {
+    "allDrop": 0,
+    "dropNum": 1,
+    "noRepeat": 1,
+    "description": "m里掉落n个, m > n, 结果不可重复.单次掉落后重新计算权重",
+    "dropIds": [
+      {
+        "dropId": "s100001",
+        "percent": 5
+      },
+      {
+        "dropId": "s100002",
+        "percent": 6
+      }
+    ]
+  },
+  "s100003": {
+    "allDrop": 1,
+    "dropNum": 0,
+    "noRepeat": 0,
+    "description": "m里全部掉落",
+    "dropIds": [
+      {
+        "dropId": "s100003",
+        "percent": 7
+      },
+      {
+        "dropId": "s100004",
+        "percent": 8
+      }
+    ]
+  },
+  "s100004": {
+    "allDrop": 1,
+    "dropNum": 0,
+    "noRepeat": 0,
+    "description": "m里全部掉落",
+    "dropIds": [
+      {
+        "dropId": "s100001",
+        "percent": 9
+      },
+      {
+        "dropId": "s100002",
+        "percent": 10
+      }
+    ]
+  }
+}

@@ -52,20 +52,22 @@ parsed_cmds.forEach(function (e) {
  * export json
  */
 function exportJson() {
-  var dir = config.xlsx.outDir || "./json";
-  var outDir = path.join(__dirname, dir);
+  var outDir = config.xlsx.outDir || "./json";
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir);
   }
   var excelDir = config.xlsx.excelDir || "./excel/**/[^~$]*.xlsx";
+  
   glob(excelDir, function (err, files) {
     if (!!err) {
       console.error("exportJson error:", err);
       throw err;
     }
     files.forEach(function (fileName) {
-      fileName = path.join(__dirname, fileName);
-      console.log("parsing excel:", fileName.substring(fileName.lastIndexOf("/") + 1));
+      //console.log("parsing excel:", fileName);
+      //var basename = path.basename(fileName);
+      console.log("parsing excel:", path.basename(fileName));
+      //if (basename != "droptest.xlsx" && basename != 'drop.xlsx') return;
       xlsx.toJson(fileName, outDir);
     });
   });

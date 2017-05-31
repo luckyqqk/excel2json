@@ -34,10 +34,10 @@ function _toJson(excel, outDir) {
     var sheetName = String(sheet.name);
     var sheetNameArray = sheetName.split(".");
     var fileName = sheetNameArray[0], attrName = sheetNameArray[1];
-    output['fileName'] = fileName;
     if (!attrName) {
       outJson[fileName] = output;
     } else {
+      output['fileName'] = fileName;
       output['attrName'] = attrName;
       attrArray.push(output);
     }
@@ -62,21 +62,25 @@ function _toJson(excel, outDir) {
       fileJson[k][attrName] = attr[k];
     }
   });
+
+  // fs的代理回调
+  var agent = function(fileName) {
+    return function (err) {
+          if (err) {
+            console.log("error：", err);
+            throw err;
+          }
+          console.log('exported successfully  -->  ', path.basename(fileName));
+        }
+  };
   // 写入json文件
   for (var key in outJson) {
-    var toJson = outJson[key];
-    var fileName = toJson['fileName'] + ".json";
-    delete toJson['fileName'];
-    toJson = JSON.stringify(toJson, null, 2);
-    var fileName = path.resolve(outDir, fileName);
-    fs.writeFile(fileName, toJson, function (err) {
-      if (err) {
-        console.log("error：", err);
-        throw err;
-      }
-      console.log('exported successfully  -->  ', path.basename(fileName));
-    });
+    var toJson = JSON.stringify(outJson[key], null, 2);
+    var fileName = path.resolve(outDir, key + ".json");
+
+    fs.writeFile(fileName, toJson, new agent(fileName));
   }
+
 }
 
 var OUTPUT_ARRAY = 0;
@@ -115,19 +119,19 @@ function _parseSheet(sheet) {
   for (var rowIdx = headCfg; rowIdx < sheet.maxRow; rowIdx++) {
     outRow = rowIdx;
     var row = sheet.data[rowIdx];
-    // 第一个字段为主键ID,遇到没有主键的行,视为导出结束
+    // 第一个字段为主键ID,跳过没有主键的行
     if (!row || !row[0] || !String(row[0].value).trim()) {
       //console.log(`${sheet.name}导出结束,共${rowIdx}行`);
-      break;
+      continue;
     }
     var jsonObj = {};
     var id;
 
     for (var colIdx = 0; colIdx < sheet.maxCol; colIdx++) {
-      // 遇到没有头的单元格,就结束
-      if (!rowHead[colIdx] || !rowHead[colIdx].value) break;  // 判断是否为空
+      // 遇到没有头的单元格,就跳过
+      if (!rowHead[colIdx] || !rowHead[colIdx].value) continue;  // 判断是否为空
       var colName = String(rowHead[colIdx].value).trim();     // 判断trim后是否为空
-      if (!colName) break;
+      if (!colName) continue;
 
       var type = rowType[colIdx];
       type = !type || !type.value ? 'basic' : String(type.value).toLowerCase().trim();
@@ -175,7 +179,7 @@ function _parseSheet(sheet) {
           parseBasicArrayField(jsonObj, colName, cellValue);
           break;
         case '[{}]':
-          jsonObj[colName] = parseObjectArrayField(jsonObj, colName, cellValue) || [];
+          parseObjectArrayField(jsonObj, colName, cellValue);
           break;
         default:
           console.log('********************************************' + type);
@@ -227,16 +231,17 @@ function convert2Date(value) {
  * parse object array.
  */
 function parseObjectArrayField(row, key, value) {
-
-  var obj_array = [];
-
-  if (value) {
-    if (value.indexOf(',') !== -1) {
-      obj_array = value.split(',');
-    } else {
-      obj_array.push(value.toString());
-    }
+  if (!value || value.length == 1) {
+    row[key] = [];
+    return;
   }
+
+  var obj_array = value.split(',');
+  //if (value.indexOf(',') !== -1) {
+  //  obj_array = value.split(',');
+  //} else {
+  //  obj_array.push(value.toString());
+  //}
 
   // if (typeof(value) === 'string' && value.indexOf(',') !== -1) {
   //     obj_array = value.split(',');
@@ -247,9 +252,8 @@ function parseObjectArrayField(row, key, value) {
   var result = [];
 
   obj_array.forEach(function (e) {
-    if (e) {
-      result.push(array2object(e.split(';')));
-    }
+    if (!e) return;
+    result.push(array2object(e.split(';')));
   });
 
   row[key] = result;
@@ -262,17 +266,16 @@ function parseObjectArrayField(row, key, value) {
 function array2object(array) {
   var result = {};
   array.forEach(function (e) {
-    if (e) {
-      var kv = e.trim().split(':');
-      if (isNumber(kv[1])) {
-        kv[1] = Number(kv[1]);
-      } else if (isBoolean(kv[1])) {
-        kv[1] = toBoolean(kv[1]);
-      } else if (isDateType(kv[1])) {
-        kv[1] = convert2Date(kv[1]);
-      }
-      result[kv[0]] = kv[1];
+    if (!e) return;
+    var kv = e.trim().split(':');
+    if (isNumber(kv[1])) {
+      kv[1] = Number(kv[1]);
+    } else if (isBoolean(kv[1])) {
+      kv[1] = toBoolean(kv[1]);
+    } else if (isDateType(kv[1])) {
+      kv[1] = convert2Date(kv[1]);
     }
+    result[kv[0]] = kv[1];
   });
   return result;
 }
