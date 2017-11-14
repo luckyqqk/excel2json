@@ -1,9 +1,0 @@
-{
-    "xlsx": {
-        "type": 2,
-        "head": 3,
-        "excelDir": "",
-        "outDir": "",
-        "arraySeparator":","
-    }
-}
