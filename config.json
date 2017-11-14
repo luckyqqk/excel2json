@@ -2,8 +2,8 @@
     "xlsx": {
         "type": 2,
         "head": 3,
-        "excelDir": "/Projects/svn/dataExcel",
-        "outDir": "/Projects/svn/Server/chariot/game-server/app/data/json, /Projects/svn/Server/chariot/web-server/public/json",
+        "excelDir": "excel dir",
+        "outDir": "outJsonDir1, outJsonDir2",
         "arraySeparator":","
     }
 }
